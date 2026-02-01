@@ -34,6 +34,7 @@ import rospkg
 from gazebo_msgs.srv import SetModelState, GetModelState
 from gazebo_msgs.msg import ModelState
 import yaml
+from trac_ik_python.trac_ik import IK
 
 def esperar_por_subscribers(publisher, timeout=None):
     """
@@ -539,11 +540,12 @@ class Cinematica:
         # Calculadores de FK y IK
         self.solver_cd = PyKDL.ChainFkSolverPos_recursive(self.cadena)
         self.solver_ci_vel = PyKDL.ChainIkSolverVel_pinv(self.cadena)
-        self.solver_ci = PyKDL.ChainIkSolverPos_NR_JL(self.cadena, self.robot.limites_inferioes_kdl_array, 
-                                                    self.robot.limites_superiores_kdl_array, self.solver_cd, 
-                                                    self.solver_ci_vel, 10000, 1e-5)
-        
+        # self.solver_ci = PyKDL.ChainIkSolverPos_NR_JL(self.cadena, self.robot.limites_inferioes_kdl_array, 
+        #                                             self.robot.limites_superiores_kdl_array, self.solver_cd, 
+        #                                             self.solver_ci_vel, 10000, 1e-5)
+        self.solver_ci = IK(frame_base, frame_final, urdf_string=self.robot.descripcion_robot)
         self.solver_jacobiano = PyKDL.ChainJntToJacSolver(self.cadena)
+        
     
     def calcular_cd(self, posiciones_articulaciones):
         """
@@ -599,16 +601,25 @@ class Cinematica:
         kdl_result_joint_values = PyKDL.JntArray(len(posiciones_articulaciones_actuales))
         
         # Calcula la cinemática inversa
-        ik_valid = self.solver_ci.CartToJnt(kdl_current_joint_values, kdl_target_pose, kdl_result_joint_values)
+        # ik_valid = self.solver_ci.CartToJnt(kdl_current_joint_values, kdl_target_pose, kdl_result_joint_values)
+        target_position_list = [pose_deseada.position.x, pose_deseada.position.y, pose_deseada.position.z] 
+        target_orientation_list = [pose_deseada.orientation.x, pose_deseada.orientation.y,
+                                   pose_deseada.orientation.z, pose_deseada.orientation.w]
+        solution = self.solver_ci.get_ik(list(posiciones_articulaciones_actuales),
+                                         target_position_list[0], target_position_list[1], target_position_list[2],
+                                         target_orientation_list[0],target_orientation_list[1],target_orientation_list[2], target_orientation_list[3],
+                                         0.001, 0.001, 0.001, # Error admitido x,y,z
+                                         0.01, 0.01, 0.01)# Error admitido rx, ry, rz
+        
         result_joint_values = []
         
-        if ik_valid < 0:
+        if solution == None:
             ok = False
         else:
             ok = True
             # Conviere el resultado a una lista
-            for i in range(kdl_current_joint_values.rows()):
-                result_joint_values.append(kdl_result_joint_values[i])
+            for i in range(len(solution)):
+                result_joint_values.append(solution[i])
                 
         return ok,result_joint_values
     

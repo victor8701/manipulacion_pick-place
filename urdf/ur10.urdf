@@ -3,7 +3,7 @@
   <!-- define pi -->
   <xacro:property name="pi" value="3.14159265359" />
   <!-- links: main serial chain -->
-  <link name="base_link">
+  <!--link name="base_link">
     <visual>
       <origin xyz="0 0 0.15" rpy="0 0 0"/>
       <geometry>
@@ -16,7 +16,8 @@
         <box size="0.17 0.17 0.3"/>
       </geometry>
     </collision>
-  </link>
+  </link>-->
+  <link name="base_link"/>
   <link name="base_link_inertia">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 3.14159265359" />
@@ -141,7 +142,7 @@
   <joint name="base_link-base_link_inertia" type="fixed">
     <parent link="base_link" />
     <child link="base_link_inertia" />
-    <origin xyz="0 0 0.32" rpy="0 0 3.14159265359" />
+    <origin xyz="0 0 0.3" rpy="0 0 3.14159265359" />
   </joint>
   <joint name="shoulder_pan_joint" type="revolute">
     <parent link="base_link_inertia" />
@@ -218,16 +219,21 @@
 
   <link name="tool0" />
   <joint name="flange-tool0" type="fixed">
-    <origin xyz="0 0 0" rpy="1.5707963267948966 0 1.5707963267948966" />
+    <origin xyz="0 0 0" rpy="0 0 3.14159265359" />
     <parent link="flange" />
     <child link="tool0" />
   </joint>
-  <link name="hand"/>
-  <joint name="tool0-hand" type="fixed">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="tool0" />
-    <child link="hand" />
-  </joint>
 
+  <link name="base"/>
+  <joint name="base_link-base_fixed_joint" type="fixed">
+      <!-- Note the rotation over Z of pi radians: as base_link is REP-103
+           aligned (ie: has X+ forward, Y+ left and Z+ up), this is needed
+           to correctly align 'base' with the 'Base' coordinate system of
+           the UR controller.
+      -->
+      <origin xyz="0 0 0" rpy="0 0 3.14159265359"/>
+      <parent link="base_link"/>
+      <child link="base"/>
+  </joint>
 
 </robot>
