@@ -1398,160 +1398,10 @@ class NodeJointSpace:
         self.joint_angles = joint_angles
         self.parent = None
         self.cost = float('inf')
-
-class RRTConnectJointSpace:
-    def __init__(self, start, goal, joint_limits, expand_dis=1.0, max_iter=500, detector_colisiones=None):
-        self.start = NodeJointSpace(start)
-        self.goal = NodeJointSpace(goal)
-        self.joint_limits = joint_limits
-        self.expand_dis = expand_dis
-        self.max_iter = max_iter
-        self.detector_colisiones = detector_colisiones
-        self.start.cost = 0
-        self.node_list_start = [self.start]
-        self.node_list_goal = [self.goal]
-
-    def plan(self):
-        for iteration in range(self.max_iter):
-            print("Iteration: ", iteration)
-
-            # Extend the start tree towards a random node
-            rnd_node = self.get_random_node(self.goal)
-            new_node_start = self.extend_tree(self.node_list_start, rnd_node)
-            if new_node_start:
-                print("We have a new node in start tree")
-                # Try to connect the goal tree to this new node
-                if self.connect_trees(self.node_list_goal, new_node_start):
-                    print("We have a path")
-                    return self.generate_final_path()
-
-            
-            # Extend the goal tree towards a random node
-            rnd_node = self.get_random_node(self.start)
-            new_node_goal = self.extend_tree(self.node_list_goal, rnd_node)
-            if new_node_goal:
-                # Try to connect the start tree to this new node
-                print("We have a new node in goal tree")
-                if self.connect_trees(self.node_list_start, new_node_goal):
-                    print("We have a path")
-                    return self.generate_final_path()
-            
-            print(self.node_list_start[-1].joint_angles)
-            print("Start tree size: ", len(self.node_list_start))
-            print("Goal tree size: ", len(self.node_list_goal))
-        return None
-
-    def connect_trees(self, tree, node):
-        nearest_node = self.get_nearest_node(tree, node)
-        print("Nearest node: ", nearest_node.joint_angles)
-        new_node = self.steer(nearest_node, node, self.expand_dis)
-        print("New node: ", new_node.joint_angles)
-        if new_node and not self.check_collision(new_node, nearest_node):
-            print("No collision")
-            print("Node: ", node.joint_angles)
-            tree.append(new_node)
-            if np.linalg.norm(np.subtract(new_node.joint_angles, node.joint_angles)) < self.expand_dis:
-                return True
-        return False
-
-    def get_random_node(self, target_node):
-        """
-        Generates a random node within the joint limits or the target node.
-        Args:
-            target_node (NodeJointSpace): The target node (goal or start) to sample occasionally.
-        Returns:
-            NodeJointSpace: The randomly generated node or the target node.
-        """
-        # Define the probability of sampling the target node
-        target_sample_rate = 0.1  # e.g., 10% chance to sample the target node
-
-        if np.random.rand() < target_sample_rate:
-            return target_node
-        else:
-            joint_angles = [np.random.uniform(low, high) for (low, high) in self.joint_limits]
-            return NodeJointSpace(joint_angles)
-
-    def extend_tree(self, tree, node):
-        nearest_node = self.get_nearest_node(tree, node)
-        new_node = self.steer(nearest_node, node, self.expand_dis)
-
-        if new_node and not self.check_collision(new_node, nearest_node):
-            print("Node: ", new_node.joint_angles)  
-            tree.append(new_node)
-            return new_node
-        return None
-
-
-    def get_nearest_node(self, tree, node):
-        distances = [self.get_distance(n, node) for n in tree]
-        nearest_idx = np.argmin(distances)
-        return tree[nearest_idx]
-
-    def steer(self, from_node, to_node, extend_length=float('inf')):
-        direction = np.array(to_node.joint_angles) - np.array(from_node.joint_angles)
-        distance = np.linalg.norm(direction)
-
-        if distance > extend_length:
-            direction = direction / distance
-            new_joint_angles = np.array(from_node.joint_angles) + extend_length * direction
-            new_node = NodeJointSpace(new_joint_angles.tolist())
-            new_node.parent = from_node
-            return new_node
-        return to_node
-
-    def check_collision(self, to_node, from_node):
-        """
-        Checks if the path between two nodes collides with any obstacles.
-        Args:
-            to_node, from_node (NodeJointSpace): Nodes to check the path between.
-        Returns:
-            bool: True if there is a collision, False otherwise.
-        """
-
-        # if DetectorColisiones.hay_colision(self, to_node.joint_angles)
-        # Number of steps for interpolation
-        num_steps = 10  # Adjust this based on desired granularity
-
-        # # Linear interpolation
-        for step in range(1, num_steps + 1):
-            ratio = step / float(num_steps)
-            interpolated_joints = (1 - ratio) * np.array(from_node.joint_angles) + ratio * np.array(to_node.joint_angles)
-            
-            # Check for collision at the interpolated position
-            if self.detector_colisiones.hay_colision(interpolated_joints):
-                return True  # Collision detected
-        if self.detector_colisiones.hay_colision(to_node.joint_angles):
-            return True
-        if self.detector_colisiones.hay_colision(from_node.joint_angles):
-            return True
-        return False  # No collision detect
-
-    def get_distance(self, node1, node2):
-        diff = np.array(node1.joint_angles) - np.array(node2.joint_angles)
-        return np.linalg.norm(diff)
-
-    def generate_final_path(self):
-        # Generate path from start to connection point
-        path_start = []
-        node = self.node_list_start[-1]
-        while node.parent is not None:
-            path_start.append(node.joint_angles)
-            node = node.parent
-        path_start.append(node.joint_angles)  # Add start node
-        path_start.reverse()
-
-        # Generate path from goal to connection point
-        path_goal = []
-        node = self.node_list_goal[-1]
-        while node.parent is not None:
-            path_goal.append(node.joint_angles)
-            node = node.parent
-        path_goal.append(self.node_list_goal[0].joint_angles)
-        return path_start + path_goal  # Combine the paths
       
 
-class RRTStarJointSpace:
-    def __init__(self, start, goal, joint_limits, expand_dis=1.0, max_iter=500, search_radius=1.5, collision_detector=None):
+class BiRRTJointSpace:
+    def __init__(self, start, goal, joint_limits, expand_dis=0.1, max_iter=500, search_radius=1.5, collision_detector=None):
         self.start = NodeJointSpace(start)
         self.start.cost = 0
         self.goal = NodeJointSpace(goal)
@@ -1561,24 +1411,69 @@ class RRTStarJointSpace:
         self.search_radius = search_radius
         self.detector_colisiones = collision_detector
         self.node_list = [self.start]
-
+        self.connect_threshold = self.search_radius
     def plan(self):
-        path_to_goal = None  # Initially, no path to goal
+        start_root = self.start
+        goal_root = self.goal
+        
+        tree_start = [start_root]
+        tree_goal = [goal_root]
+        
+        self.node_list = tree_start
+        
         for i in range(self.max_iter):
-            rnd_node = self.get_random_node(self.goal)
-            nearest_node = self.get_nearest_node(rnd_node)
+
+            if i % 2 == 0:
+                tree_a, root_a = tree_start, start_root
+                tree_b, root_b = tree_goal, goal_root
+            else:
+                tree_a, root_a = tree_goal, goal_root
+                tree_b, root_b = tree_start, start_root
+
+
+            target_node = root_b
+            rnd_node = self.get_random_node(target_node)
+            
+
+            nearest_node = self.get_nearest_node(rnd_node, tree_a)
+
             new_node = self.steer(nearest_node, rnd_node, self.expand_dis)
-            if not self.check_collision(new_node, nearest_node):
-                near_nodes = self.find_near_nodes(new_node)
-                new_node = self.choose_parent(near_nodes, new_node)
-                if new_node:
-                    self.node_list.append(new_node)
-                    self.rewire(new_node, near_nodes)
-        # After all iterations, attempt to connect the closest node in the tree to the goal
-        closest_node_to_goal = self.get_nearest_node(self.goal)
-        if self.check_goal_path(closest_node_to_goal):
-            path_to_goal = self.generate_final_path(self.goal)
-        return path_to_goal
+
+            if self.check_collision(new_node, nearest_node):
+                continue
+
+            tree_a.append(new_node)
+            
+
+            nearest_other = self.get_nearest_node(new_node, tree_b)
+            
+            connect_node = self.steer(nearest_other, new_node, self.expand_dis)
+
+            if self.check_collision(connect_node, nearest_other):
+                continue
+
+            if self.get_distance(connect_node, new_node) > self.connect_threshold:
+                continue
+
+            tree_b.append(connect_node)
+
+
+            if tree_a is tree_start:
+                path_start = self.build_path_to_root(new_node)         # start_root → new_node
+                path_goal = self.build_path_to_root(connect_node)      # goal_root → connect_node
+            else:
+                path_start = self.build_path_to_root(connect_node)     # start_root → connect_node
+                path_goal = self.build_path_to_root(new_node)          # goal_root → new_node
+
+            path_goal.reverse()
+            
+
+            full_path = path_start + path_goal[1:]
+
+            return full_path
+
+        return None
+
 
     def get_random_node(self, target_node):
         """
@@ -1589,7 +1484,7 @@ class RRTStarJointSpace:
             NodeJointSpace: The randomly generated node or the target node.
         """
         # Define the probability of sampling the target node
-        target_sample_rate = 0.1  # e.g., 10% chance to sample the target node
+        target_sample_rate = 0.2  # e.g., 10% chance to sample the target node
 
         if np.random.rand() < target_sample_rate:
             return target_node
@@ -1597,10 +1492,10 @@ class RRTStarJointSpace:
             joint_angles = [np.random.uniform(low, high) for (low, high) in self.joint_limits]
             return NodeJointSpace(joint_angles)
 
-    def get_nearest_node(self, node):
-        distances = [self.get_distance(n, node) for n in self.node_list]
+    def get_nearest_node(self, node, node_list):
+        distances = [self.get_distance(n, node) for n in node_list]
         nearest_idx = np.argmin(distances)
-        return self.node_list[nearest_idx]
+        return node_list[nearest_idx]
 
       
     def steer(self, from_node, to_node, extend_length=float('inf')):
@@ -1621,6 +1516,16 @@ class RRTStarJointSpace:
         new_node = NodeJointSpace(new_joint_angles.tolist())
         new_node.parent = from_node
         return new_node
+
+    def build_path_to_root(self,node):
+        """Devuelve la trayectoria desde la raíz de ese árbol hasta node."""
+        path = []
+        current = node
+        while current is not None:
+            path.append(current.joint_angles)
+            current = current.parent
+        path.reverse()
+        return path
 
 
 
