@@ -8,7 +8,7 @@
       <inertial>
         <pose>0.011875 0.003744 -0.013060  0 0 0</pose>
         <!-- POSE IS CENTER OF MASS -->
-        <mass>0.3</mass>
+        <mass>0.1</mass>
         <inertia>
           <!-- GET THIS VALUE WITH MESHLAB - COMPUTE GEOMETRIC FEATURES ON x10 scaled mesh -->
           <ixx> 5.40211e-3</ixx>
@@ -32,8 +32,8 @@
         <surface>
           <friction>
             <ode>
-              <mu>0.3</mu>
-              <mu2>0.3</mu2>
+              <mu>0.8</mu>
+              <mu2>0.8</mu2>
             </ode>
           </friction>
         </surface>

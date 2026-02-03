@@ -1,0 +1,51 @@
+<?xml version='1.0'?>
+<sdf version="1.4">
+  <model name="lego_duplo">
+    <static>false</static>
+    <link name="link">
+      <inertial>       
+        <pose>-0.08219326760466368 -0.014303918705334649 0.06073349067050446 1.5679255663453595 0.00499404779186771 -1.5722540269561813</pose> 
+        <mass>0.0006794008380914333</mass>
+        <inertia>
+          <ixx>4.758640266995553e-06</ixx>
+          <ixy>1.5291730311936678e-22</ixy>
+          <ixz>7.991227196376165e-24</ixz>
+          <iyy>4.449114715007834e-06</iyy>
+          <iyz>-8.441728530190073e-24</iyz>
+          <izz>6.105185113208868e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <!-- Use a downsampled mesh for collisions -->
+            <uri>model://lego_duplo/meshes/nontextured.stl</uri>
+            <scale>5 1.5 5</scale>
+	        </mesh>
+        </geometry>
+        <surface>
+        <!--<friction>
+          <ode>
+            <mu>0.8</mu>
+            <mu2>0.6</mu2>
+          </ode>
+        </friction>-->
+      </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://lego_duplo/meshes/nontextured.stl</uri>
+            <scale>5 1.5 5</scale>
+	        </mesh>
+        </geometry>
+        <!-- <material>
+          <script>
+            <uri>model://bowl/bowl.material</uri>
+            <name>bowl</name>
+          </script>
+        </material> -->
+      </visual>
+    </link>
+  </model>
+</sdf>

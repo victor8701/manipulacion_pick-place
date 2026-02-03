@@ -3,35 +3,92 @@ mustard_bottle:
     x: -2.0
     y: -2.0
     z: 0.005
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
 driller_small:
   position:
     x: -2.0
     y: -2.0
     z: -0.065
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
 banana:
   position:
     x: -2.0
     y: -2.0
     z: -0.025
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
 chips_can:
   position:
     x: -2.0
     y: -2.0
     z: -0.1
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
 bleach_cleanser:
   position:
     x: -2.0
     y: -2.0
     z: -0.1
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
 construction_cone:
   position:
     x: -2.0
     y: -2.0
     z: -0.0
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
 mug:
   position:
     x: -2.0
     y: -2.0
-    z: -0.05
+    z: -0.04
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+bowl:
+  position:
+    x: -2.0
+    y: -2.0
+    z: 0.005
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+lego_duplo:
+  position:
+    x: -2.0
+    y: -2.0
+    z: 0.005
+  orientation:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+
+
 
 

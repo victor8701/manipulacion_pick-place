@@ -52,7 +52,7 @@
   <include if="$(eval arg('tipo_gripper') == 'schunk')" file="$(find manipulacion_pkg)/launch/gripper/schunk_controllers.launch"/>
 
   <node name="object_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
-  args="-sdf -file $(find manipulacion_pkg)/objects_models/$(arg objeto)/model.sdf -model $(arg objeto) -x 0.8 -y 0.4 -z 0.0 -R 0 -P 0 -Y 0"/>
+  args="-sdf -file $(find manipulacion_pkg)/objects_models/$(arg objeto)/model.sdf -model $(arg objeto) -x 0.8 -y 0.5 -z 0.0 -R 0 -P 0 -Y 0.5"/>
 
   <node name="obstacle_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
   args="-sdf -file $(find manipulacion_pkg)/objects_models/other_red_obstacle/model.sdf -model other_red_obstacke -x 0.7 -y 0.0 -z 0.0 -R 0 -P 0 -Y 0"/>

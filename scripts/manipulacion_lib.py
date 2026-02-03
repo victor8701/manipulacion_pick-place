@@ -123,8 +123,9 @@ def extraer_posicion_superficie_plana_de_yaml(yaml_file, nombre_objeto):
     positions = []
     for object_name, object_data in data.items():
       if object_name == nombre_objeto:
-        positions = [object_data['position']['x'],object_data['position']['y'], object_data['position']['z']] 
-    return positions
+        positions = [object_data['position']['x'],object_data['position']['y'], object_data['position']['z']]
+        orientations =  [object_data['orientation']['x'],object_data['orientation']['y'], object_data['orientation']['z'], object_data['orientation']['w']]
+    return positions, orientations
 
 
 
@@ -368,6 +369,10 @@ class GazeboRobot(Robot):
         super().__init__(nombres_articulaciones=nombres_articulaciones)   
         self.pub = rospy.Publisher('/eff_joint_traj_controller/command', JointTrajectory, queue_size=10)
     
+    def wrap_to_pi(self, q):
+        q = np.array(q, dtype=float)
+        return (q + np.pi) % (2 * np.pi) - np.pi
+    
     def obtener_posiciones_articulaciones(self):
         message = rospy.wait_for_message("joint_states", JointState)
       
@@ -381,6 +386,7 @@ class GazeboRobot(Robot):
               index = message.name.index(joint_name)
               # Append the corresponding position to the ordered list
               ordered_positions.append(message.position[index])
+        ordered_positions = self.wrap_to_pi(ordered_positions)
         # Return or use the joint_positions as needed
         return ordered_positions
     
@@ -430,7 +436,7 @@ class GazeboRobot(Robot):
             'wrist_3_joint'
         ]
         trajectory.points = trajectory_points
-        print(trajectory)
+        # print(trajectory)
         # Publish the trajectory
         esperar_por_subscribers(self.pub, 2)
         self.pub.publish(trajectory)
@@ -545,7 +551,11 @@ class Cinematica:
         #                                             self.solver_ci_vel, 10000, 1e-5)
         self.solver_ci = IK(frame_base, frame_final, urdf_string=self.robot.descripcion_robot)
         self.solver_jacobiano = PyKDL.ChainJntToJacSolver(self.cadena)
-        
+    
+    def wrap_to_pi(self, q):
+        q = np.array(q, dtype=float)
+        return (q + np.pi) % (2 * np.pi) - np.pi
+    
     
     def calcular_cd(self, posiciones_articulaciones):
         """
@@ -608,8 +618,8 @@ class Cinematica:
         solution = self.solver_ci.get_ik(list(posiciones_articulaciones_actuales),
                                          target_position_list[0], target_position_list[1], target_position_list[2],
                                          target_orientation_list[0],target_orientation_list[1],target_orientation_list[2], target_orientation_list[3],
-                                         0.001, 0.001, 0.001, # Error admitido x,y,z
-                                         0.01, 0.01, 0.01)# Error admitido rx, ry, rz
+                                         0.0001, 0.0001, 0.0001, # Error admitido x,y,z
+                                         0.002, 0.002, 0.002)# Error admitido rx, ry, rz
         
         result_joint_values = []
         
@@ -620,6 +630,7 @@ class Cinematica:
             # Conviere el resultado a una lista
             for i in range(len(solution)):
                 result_joint_values.append(solution[i])
+            result_joint_values = self.wrap_to_pi(result_joint_values)
                 
         return ok,result_joint_values
     
