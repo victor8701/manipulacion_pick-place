@@ -1,9 +1,0 @@
-joint_names:
-  - hand_finger_joint_0
-  - hand_finger_joint_2
-  - hand_finger_joint_4
-joint_positions_open:
-  hand_finger_joint_0: 0.1
-  hand_finger_joint_2: 0.1
-  hand_finger_joint_4: 0.1
-topic_pub: '/jaco_hand_joint_traj_controller/command'
