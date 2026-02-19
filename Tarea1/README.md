@@ -10,3 +10,6 @@ Esta carpeta contiene los scripts y notebooks necesarios para la primera fase de
 1. Definir posiciones de agarre (grasp poses) para diferentes objetos.
 2. Simular el cierre del gripper en Gazebo.
 3. Evaluar la estabilidad del agarre.
+
+## Demostración
+![Video de la tarea](video_tarea1.mp4)
