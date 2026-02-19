@@ -12,6 +12,9 @@ Esta carpeta contiene los scripts y notebooks necesarios para la primera fase de
 3. Evaluar la estabilidad del agarre.
 
 ## Demostración
-https://github.com/victor8701/manipulacion_pick-place/raw/main/Tarea1/video_demo.mp4
 
-Si no se previsualiza arriba, puedes ver el video directamente en la carpeta Tarea1.
+<video src="video_demo.mp4" width="100%" controls>
+  Tu navegador no soporta el elemento de video.
+</video>
+
+Si el video no carga, puedes verlo directamente [aquí](video_demo.mp4).
